@@ -1,0 +1,47 @@
+******submit this code to create vsam file
+
+//SAMPLE JOB(TESTJCL,XXXXXX),CLASS=A,MSGCLASS=C
+//STEP1  EXEC PGM=IDCAMS
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+        DEFINE CLUSTER (NAME(MY.VSAM.KSDSFILE)  -
+        INDEXED                                 -
+        RECSZ(80 80)                            -
+        TRACKS(1,1)                             -
+        KEYS(5  0)                              -
+        CISZ(4096)                              -                            
+        FREESPACE(3 3) )                        -
+        DATA (NAME(MY.VSAM.KSDSFILE.DATA))      -
+        INDEX (NAME(MY.VSAM.KSDSFILE.INDEX))
+/* 
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+*****this code to delete vsam
+
+//SAMPLE JOB(TESTJCL,XXXXXX),CLASS=A,MSGCLASS=C
+//STEPNAME EXEC PGM=IDCAMS
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+    DELETE MY.VSAM.KSDSFILE CLUSTER
+  PURGE
+/* 
+
+------------------------------------------------------------------------------------------------------------------------------------------
+******this code to copy ps file to vsam
+
+//COPY JOB ,'your name',CLASS=class,TIME=(mm,ss),LINES=lines
+/*ROUTE  PRINT node.location
+// EXEC PGM=IDCAMS
+//SYSPRINT DD SYSOUT=A
+//VSAM DD DSN=UF.userid.VSAM.DATASET,DISP=OLD
+//SEQ  DD DSN=UF.userid.SEQ.BACKUP,UNIT=SYSDA,
+//     SPACE=(TRK,(10,10)),
+//     DISP=(NEW,CATLG),
+//     DCB=(LRECL=104,BLKSIZE=1004,RECFM=VB)
+//SYSIN DD *
+REPRO -
+  INFILE(VSAM) -
+  OUTFILE(SEQ)
+/*  
+
+-----------------------------------------------------------------------------------------------------------------------------------------

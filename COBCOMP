@@ -1,0 +1,39 @@
+//IBMUSERP JOB (123),'LOAN',CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1),          00010000
+//             NOTIFY=&SYSUID                                           00020000
+//***************************************************                   00030000
+//COB    EXEC PGM=IGYCRCTL,REGION=0M,                                   00040000
+//  PARM='DYNAM,SSRANGE,NOSEQ,LIST,MAP,SOURCE,XREF'                     00050000
+//SYSLIB   DD DSN=IBMUSER.DEMO.TEST.COPYLIB(HELLOCP),DISP=SHR           00051000
+//SYSIN    DD DISP=SHR,DSN=IBMUSER.DEMO.TEST.SRCLIB(TRYPGM)             00053300
+//SYSLIN   DD DSN=&&LOADSET,DISP=(MOD,PASS),                            00055000
+//            UNIT=SYSDA,SPACE=(80,(250,100))                           00056000
+//SYSMDECK DD DISP=(MOD,DELETE),                                        00057000
+//            DSN=IBMUSER.DEMO.SYSMDECK,                                00058000
+//            SPACE=(100,(100,100)),UNIT=SYSDA                          00059000
+//SYSPRINT DD SYSOUT=*                                                  00059100
+//SYSUT1   DD UNIT=SYSDA,SPACE=(460,(350,100))                          00059200
+//SYSUT2   DD UNIT=SYSDA,SPACE=(460,(350,100))                          00059300
+//SYSUT3   DD UNIT=SYSDA,SPACE=(460,(350,100))                          00059400
+//SYSUT4   DD UNIT=SYSDA,SPACE=(460,(350,100))                          00059500
+//SYSUT5   DD UNIT=SYSDA,SPACE=(460,(350,100))                          00059600
+//SYSUT6   DD UNIT=SYSDA,SPACE=(460,(350,100))                          00059700
+//SYSUT7   DD UNIT=SYSDA,SPACE=(460,(350,100))                          00059800
+//SYSUT8   DD UNIT=SYSDA,SPACE=(460,(350,100))                          00059900
+//SYSUT9   DD UNIT=SYSDA,SPACE=(460,(350,100))                          00060000
+//SYSUT10  DD UNIT=SYSDA,SPACE=(460,(350,100))                          00060100
+//SYSUT11  DD UNIT=SYSDA,SPACE=(460,(350,100))                          00060200
+//SYSUT12  DD UNIT=SYSDA,SPACE=(460,(350,100))                          00060300
+//SYSUT13  DD UNIT=SYSDA,SPACE=(460,(350,100))                          00060400
+//*************************************************                     00060500
+//LKED   EXEC PGM=IEWL,REGION=4M,                                       00060600
+//            PARM='LIST,XREF',COND=(5,LT,COB)                          00060700
+//SYSLIB   DD DSN=DFH530.CICS.SDFHLOAD,DISP=SHR                         00060800
+//         DD DSN=CEE.SCEELKED,DISP=SHR                                 00060900
+//         DD DSN=IBMUSER.DEMO.LOADLIB.PDSE,DISP=SHR                    00061000
+//SYSLMOD  DD DSN=IBMUSER.DEMO.LOADLIB.PDSE(TRYPGM),DISP=SHR            00061100
+//SYSPRINT DD SYSOUT=*                                                  00064000
+//SYSLIN   DD DSN=&&LOADSET,DISP=(MOD,PASS),                            00065000
+//            UNIT=SYSDA,SPACE=(80,(250,100))                           00066000
+//SYSUT1   DD UNIT=SYSDA,DCB=BLKSIZE=1024,                              00191000
+//            SPACE=(1024,(200,20))                                     00192000
+//*                                                                     00200000
