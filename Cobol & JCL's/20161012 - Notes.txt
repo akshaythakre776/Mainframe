@@ -1,0 +1,105 @@
+Emp ID = 5
+Emp Name = 20
+Emp Loc = 3
+Emp DOB = 8
+
+STRUC EMPLOYEE{
+	int emp_id;
+	string emp_name;
+	string emp_loc;
+	int emp_dob;
+==========================================
+WORKING-STORAGE SECTION.
+01  CUST-ADDRESS.
+     05  CUST-NAME.
+	10  CUST-FIRST-NAME	PIC X(10). PIC XXXXXXXXXX
+        10  CUST-LAST-NAME	PIC X(15). PIC XXXXXXXXXXXXXXX
+     05  CUST-STREET.
+	10  CUST-ST-NO		PIC 9(03). PIC 999
+	10  CUST-ST-NAME	PIC X(20). PIC XXXXXXXXXXXXXXXXXXXX
+     05   CUST-ZIP-CODE		PIC 9(06). PIC 999999
+=====================================================
+01	F1	PIC X(05)
+
+IF F1 = '*****'
+IF F1 = ALL '*'
++++++++++++++++
+Program to Write =
+1) Accept 2 Numbers A and B
+2) Do Addition, Subtraction, Multiplication & Division on A and B
+3) Display C = A + B
+4) Display D = A - B
+5) Display E = A * B
+6) Display F = A / B
+++++++++++++++++++++
+01  F	PIC 9(02)V99.
+
+01  F-O	PIC 9(02).99.
+
+F = 1234	F-A = 12.34
+========================================================================
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PROG6.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  INPUT-FIELDS.
+           03  A       PIC 9(02).
+           03  B       PIC 9(02).
+           03  C       PIC 9(03).
+           03  D       PIC S9(02).
+           03  E       PIC 9(04).
+           03  F       PIC 9(02)V99.
+       01  OUTPUT-FIELDS.
+           03  C-O     PIC ZZ9.
+           03  D-O1     PIC -9(02).
+           03  D-O2    PIC --9.
+           03  E-O1    PIC ZZZ9.
+           03  E-O2    PIC ***9.
+           03  E-O3    PIC Z,ZZ9.
+           03  F-O     PIC 9(02).99.
+       PROCEDURE DIVISION.
+           DISPLAY 'ENTER FIELD-1 ' WITH NO ADVANCING
+           ACCEPT A
+           DISPLAY 'ENTER FIELD-2 ' WITH NO ADVANCING
+           ACCEPT B
+           DISPLAY '*--------*'
+           DISPLAY A, ' ' B
+           DISPLAY '*--------*'
+           ADD A B GIVING C
+           SUBTRACT A FROM B GIVING D
+           MULTIPLY A BY B GIVING E
+           DIVIDE B INTO A GIVING F
+           MOVE C TO C-O
+           MOVE D TO D-O1, D-O2
+           MOVE E TO E-O1, E-O2, E-O3
+           MOVE F TO F-O
+           DISPLAY 'ADD  = ', C-O
+           DISPLAY 'SUB  = ', D-O1, ' ', D-O2
+           DISPLAY 'MULT = ', E-O1, ' ', E-O2, ' ', E-O3
+           DISPLAY 'DIV  = ', F-O
+           DISPLAY '*--------*'
+           STOP RUN.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

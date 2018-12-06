@@ -1,0 +1,97 @@
+JCL to Delete/Define the KSDS, Sort the Input & Repro Records to KSDS
+Member = KSDSJCL in DSRP154.AMOGH.JCLLIB
+
+//DSRP154V JOB CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID
+//STEP01 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *                                                   
+ DELETE DSRP154.AMOGH.KSDS CLUSTER PURGE                       
+ SET MAXCC=0                                                   
+ DEFINE CLUSTER (NAME(DSRP154.AMOGH.KSDS) -                    
+        TRACKS(1 1) -
+	KEYS(5 0) -                                          
+        RECORDSIZE(50 50) -                                    
+        INDEXED ) -                                                    
+        DATA (NAME(DSRP154.AMOGH.KSDS.DATA) )-                  
+        INDEX (NAME(DSRP154.AMOGH.KSDS.INDEX) )                  
+/*
+//STEP02 EXEC PGM=SORT                                         
+//SYSOUT   DD SYSOUT=*                                         
+//SORTIN   DD DSN=DSRP154.AMOGH.PSINPUT,DISP=SHR               
+//SORTOUT  DD DSN=&&TEMP,DISP=(NEW,PASS),                      
+//         DCB=(RECFM=FB,LRECL=50,BLKSIZE=5000),               
+//         SPACE=(TRK,(1,1),RLSE)                              
+//SYSIN DD *                                                   
+   SORT FIELDS=(1,5,CH,A)                                      
+/*                                                             
+//STEP03 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//FILE1    DD DSN=&&TEMP,DISP=OLD                              
+//FILE2    DD DSN=DSRP154.AMOGH.KSDS,DISP=SHR                  
+//SYSIN DD *                                                   
+  REPRO INFILE(FILE1) -
+       OUTFILE(FILE2) -
+       REPLACE         
+/*
+=======================================================================
+PROC to Delete/Define the KSDS, Sort the Input & Repro Records to KSDS
+Member = KSDSPROC in DSRP154.AMOGH.PROCLIB
+
+//KSDSPROC PROC
+//STEP01 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD DSN=DSRP154.AMOGH.PARMLIB(DELNDEF),DISP=SHR
+//*                                                  
+//STEP02 EXEC PGM=SORT                                         
+//SYSOUT   DD SYSOUT=*                                         
+//SORTIN   DD DSN=DSRP154.AMOGH.PSINPUT,DISP=SHR               
+//SORTOUT  DD DSN=&&TEMP,DISP=(NEW,PASS),                      
+//         DCB=(RECFM=FB,LRECL=50,BLKSIZE=5000),               
+//         SPACE=(TRK,(1,1),RLSE)                              
+//SYSIN DD DSN=DSRP154.AMOGH.PARMLIB(SORTKSDS),DISP=SHR
+/*                                                             
+//STEP03 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//FILE1    DD DSN=&&TEMP,DISP=OLD                              
+//FILE2    DD DSN=DSRP154.AMOGH.KSDS,DISP=SHR                  
+//SYSIN DD DSN=DSRP154.AMOGH.PARMLIB(LOADKSDS),DISP=SHR
+//    PEND
+++++++++++
+Delete / Define Parameters for KSDS
+Member = DELNDEF in DSRP154.AMOGH.PARMLIB
+
+ DELETE DSRP154.AMOGH.KSDS CLUSTER PURGE                       
+ SET MAXCC=0                                                   
+ DEFINE CLUSTER (NAME(DSRP154.AMOGH.KSDS) -                    
+        TRACKS(1 1) -
+	KEYS(5 0) -                                          
+        RECORDSIZE(50 50) -                                    
+        INDEXED ) -                                                    
+        DATA (NAME(DSRP154.AMOGH.KSDS.DATA) )-                  
+        INDEX (NAME(DSRP154.AMOGH.KSDS.INDEX) )                 
+/*
+++++++++++++++++
+Sort Parameters for Loading PS File to KSDS
+Member = SORTKSDS in DSRP154.AMOGH.PARMLIB
+
+   SORT FIELDS=(1,5,CH,A)
+   SUM FIELDS=NONE
+/*
+++++++++++++++++
+Repro Parameters for Loading PS File to KSDS
+Member = LOADKSDS in DSRP154.AMOGH.PARMLIB
+
+  REPRO INFILE(FILE1) -
+       OUTFILE(FILE2) -
+       REPLACE         
+/*
+++++++++++++++++
+JCL to invoke the Cataloged Procedure
+Member = JCLKSDS in DSRP154.AMOGH.JCLLIB
+
+//DSRP154V JOB CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID
+//PROCLIB JCLLIB ORDER=('DSRP154.AMOGH.PROCLIB')
+//*
+//STEP01 EXEC PGM=KSDSPROC
+//*
+++++++++++++++++++++++++++

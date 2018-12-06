@@ -1,0 +1,28 @@
+Allocate a PDS = DSRPnnn.NAME.VSAMLIB; NAME = Your Name
+RecLen = 80, RecFM = FB, Space = TRKS, P = 1, S = 1, PDS
+Create a new Member = JCL1
+==========================
+Profile Settings for PDS containing JCL
+Profile / Prof
+Recovery On / Rec on
+Caps On
+Num Off
+Hilite JCL / Hi JCL
+Profile Lock / Prof Lock
+Reset / Res
+========================
+//DSRP154V JOB CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID
+//*                                                           
+//STEP01 EXEC PGM=IDCAMS                                      
+//SYSPRINT DD SYSOUT=*                                        
+//SYSIN DD *                                                  
+ DELETE DSRP154.AMOGH.ESDS CLUSTER PURGE
+ DEFINE CLUSTER (NAME(DSRP154.AMOGH.ESDS) -                   
+        TRACKS(1 1) -                                         
+        RECORDSIZE(50 50) -                                   
+        NONINDEXED -                                          
+        ) -                                                   
+        DATA (NAME(DSRP154.AMOGH.ESDS.DATA) -                 
+        )                                                     
+/*                                                            
+

@@ -1,0 +1,160 @@
+Employee File Fields =
+01 - 05 = Employee No		- Primary Key
+06 - 20 = Employee Name
+21 - 23 = Employee Loc		- AIX Key (Dup) - Avg = 3, Max = 8
+24 - 31 = Employee DOB
+32 - 38 = Employee Technology
+39 - 50 = Spaces
+
+Primary Key = (5 0)
+Recordsize = (50 50)
+
+AIX Key = (3 20)
+Recordsize = (23 48)
+----+----1----+----2----+----3----+----4----+----5
+20002EMP NAME - 02  MUM        M/F                
+10001EMP NAME - 01  MUM        TESTING            
+40004EMP NAME - 04  DEL        TESTING            
+60006EMP NAME - 06  DEL        JAVA               
+30003EMP NAME - 03  BGL        SAP                
+70007EMP NAME - 07  BGL        JAVA               
+50005EMP NAME - 05  CHN        M/F                
+80008EMP NAME - 08  CHN        SAP                
+====================
+//DSRP154V JOB CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID
+//STEP01 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *            
+ DELETE DSRP154.AMOGH.EMPLOYEE CLUSTER PURGE                   
+ SET MAXCC=0                                                   
+ DEFINE CLUSTER (NAME(DSRP154.AMOGH.EMPLOYEE) -                
+        TRACKS(1 1) -                                          
+        KEYS(5 0) -                                            
+        RECORDSIZE(50 50) -                                    
+        INDEXED ) -                                                    
+        DATA (NAME(DSRP154.AMOGH.EMPLOYEE.DATA) ) -                                                    
+        INDEX (NAME(DSRP154.AMOGH.EMPLOYEE.INDEX) )
+//STEP02 EXEC PGM=SORT                           
+//SYSOUT   DD SYSOUT=*                           
+//SORTIN   DD DSN=DSRP154.AMOGH.PSINPUT,DISP=SHR 
+//SORTOUT  DD DSN=&&TEMP,DISP=(NEW,PASS),        
+//         DCB=(RECFM=FB,LRECL=50,BLKSIZE=5000), 
+//         SPACE=(TRK,(1,1),RLSE)                
+//SYSIN DD *                                     
+   SORT FIELDS=(1,5,CH,A)                        
+   SUM FIELDS=NONE                               
+/*                                               
+//STEP03 EXEC PGM=IDCAMS                         
+//SYSPRINT DD SYSOUT=*                           
+//FILE1    DD DSN=&&TEMP,DISP=OLD                
+//FILE2    DD DSN=DSRP154.AMOGH.EMPLOYEE,DISP=SHR
+//SYSIN DD *                                     
+  REPRO INFILE(FILE1) -                          
+       OUTFILE(FILE2) -                          
+       REPLACE                                   
+/*                                               
+//STEP04 EXEC PGM=IDCAMS                                  
+//SYSPRINT DD SYSOUT=*                                    
+//SYSIN DD *                                              
+ DEFINE ALTERNATEINDEX (NAME(DSRP154.AMOGH.EMPLOYEE.LOCAIX) -
+        RELATE(DSRP154.AMOGH.EMPLOYEE) -                  
+        TRACKS(1 1) -                                     
+        RECORDSIZE(23 48) -                               
+        KEYS(3 20) -                                      
+        NONUNIQUEKEY -                                    
+        UPGRADE ) -                                               
+        DATA (NAME(DSRP154.AMOGH.EMPLOYEE.LOCAIX.DATA) ) -                                               
+        INDEX (NAME(DSRP154.AMOGH.EMPLOYEE.LOCAIX.INDEX) )                                                 
+/*                                                        
+//STEP05 EXEC PGM=IDCAMS                             
+//SYSPRINT DD SYSOUT=*                               
+//FILE2    DD DSN=DSRP154.AMOGH.EMPLOYEE.LOCAIX,DISP=SHR
+//FILE1    DD DSN=DSRP154.AMOGH.EMPLOYEE,DISP=SHR    
+//SYSIN DD *                                         
+ BLDINDEX -                                          
+ INFILE(FILE1) -                                     
+ OUTFILE(FILE2)                                      
+/*                                                   
+//STEP06 EXEC PGM=IDCAMS                             
+//SYSPRINT DD SYSOUT=*                               
+//SYSIN DD *                                         
+ DEFINE PATH(NAME(DSRP154.AMOGH.EMPLOYEE.PATH) -     
+ PATHENTRY(DSRP154.AMOGH.EMPLOYEE.LOCAIX) -             
+ UPDATE)                                             
+/*
+//STEP07 EXEC PGM=IDCAMS                                  
+//SYSPRINT DD SYSOUT=*                                    
+//SYSIN DD *                                              
+ DEFINE ALTERNATEINDEX (NAME(DSRP154.AMOGH.EMPLOYEE.TECHAIX) -
+        RELATE(DSRP154.AMOGH.EMPLOYEE) -                  
+        TRACKS(1 1) -                                     
+        RECORDSIZE(27 52) -                               
+        KEYS(7 31) -                                      
+        NONUNIQUEKEY -                                    
+        UPGRADE ) -                                               
+        DATA (NAME(DSRP154.AMOGH.EMPLOYEE.TECHAIX.DATA) ) -                                               
+        INDEX (NAME(DSRP154.AMOGH.EMPLOYEE.TECHAIX.INDEX) )                                                 
+/*                                                        
+//STEP08 EXEC PGM=IDCAMS                             
+//SYSPRINT DD SYSOUT=*                               
+//FILE2    DD DSN=DSRP154.AMOGH.EMPLOYEE.TECHAIX,DISP=SHR
+//FILE1    DD DSN=DSRP154.AMOGH.EMPLOYEE,DISP=SHR    
+//SYSIN DD *                                         
+ BLDINDEX -                                          
+ INFILE(FILE1) -                                     
+ OUTFILE(FILE2)                                      
+/*                                                   
+//STEP09 EXEC PGM=IDCAMS                             
+//SYSPRINT DD SYSOUT=*                               
+//SYSIN DD *                                         
+ DEFINE PATH(NAME(DSRP154.AMOGH.EMPLOYEE.TECHPATH) -     
+ PATHENTRY(DSRP154.AMOGH.EMPLOYEE.TECHAIX) -             
+ UPDATE)                                             
+/*                                                                                                      
++++++++++++++++++++++++++++++++++++++++++++++++++
+JCL to create a Generation Data Group (GDG) Base Entry =
+//STEP01 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *                                                   
+  DELETE DSRP154.AMOGH.GDGBASE GDG FORCE PURGE                       
+  SET MAXCC=0                                                  
+  DEFINE GDG (NAME(DSRP154.AMOGH.GDGBASE) -                    
+    LIMIT(5) -                                                 
+    NOEMPTY -                                                  
+    SCRATCH)                                                   
+/*                                                             
+++++++++++++
+JCL to create a Generation Data Group (GDG) Base Entry =
+//STEP010 EXEC PGM=IEFBR14
+//FILE1   DD DSN=DSRP154.AMOGH.GDGBASE(+1),
+//        DISP=(NEW,CATLG,DELETE),
+//        DCB=(RECFM=FB,LRECL=50,BLKSIZE=5000),
+//        SPACE=(TRK,(1,1),RLSE)
+//*
+++++++++++++++++++++++++++++++++
+JCL to create new Generations of the GDG =
+//STEP010 EXEC PGM=IEBGENER                        
+//SYSUT1  DD DSN=DSRP154.AMOGH.GDGBASE(-1),DISP=SHR
+//SYSUT2  DD DSN=DSRP154.AMOGH.GDGBASE(+1),        
+//        DISP=(NEW,CATLG,DELETE),                 
+//        DCB=(RECFM=FB,LRECL=80,BLKSIZE=8000),    
+//        SPACE=(TRK,(1,1),RLSE)                   
+//SYSPRINT DD SYSOUT=*                             
+//SYSIN    DD DUMMY                                
+//*                                                
+//STEP020 EXEC PGM=IEBGENER                        
+//SYSUT1  DD DSN=DSRP154.AMOGH.GDGBASE(0),DISP=SHR 
+//SYSUT2  DD DSN=DSRP154.AMOGH.GDGBASE(+2),        
+//        DISP=(NEW,CATLG,DELETE),                 
+//        DCB=(RECFM=FB,LRECL=80,BLKSIZE=8000),    
+//        SPACE=(TRK,(1,1),RLSE)                   
+//SYSPRINT DD SYSOUT=*                             
+//SYSIN    DD DUMMY                                
+
+
+
+
+
+
+
+

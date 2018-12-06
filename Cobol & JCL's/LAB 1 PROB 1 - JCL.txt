@@ -1,0 +1,9 @@
+000100 //DSRP152T JOB LA2720,'SVC',NOTIFY=&SYSUID    
+000200 //COBRUN5 EXEC PGM=CBL2                       
+000300 //STEPLIB DD DSN=DSRP152.MFT.LOADLIB,DISP=SHR 
+000400 //SYSPRINT DD SYSOUT=*                        
+000500 //SYSOUT   DD SYSOUT=*                        
+000600 //SYSIN    DD  *                              
+000700 300                                           
+000800 600                                           
+000900 /*                                            

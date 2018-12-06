@@ -1,0 +1,176 @@
+01  EMPLOYEE-RECORD.
+    03  EMP-ID		PIC X(05).
+    03  EMP-NAME	PIC X(15).
+    03  EMP-LOC		PIC X(03).
+    03  EMP-TECH	PIC X(05).
+    03  EMP-DOB		PIC X(08).
+    03  EMP-EARN	PIC 9(05)V99.
+    03  EMP-DEDN	PIC 9(05)V99.
+=====================================
+	LOCATION & TECHNOLOGY WISE REPORT OF COMPANY EMPLOYEES
+
+DATE: DD/MM/CCYY					TIME: HH:MM:SS
+LISTING OF EMPLOYEES					PAGE: 01
+
+LOC: L-1	TECH: TCH-1
+ID    NAME	  BIRTH DATE	 EARNINGS DEDUCTIONS  TOTAL SAL
+11111 EMP NAME-1  DD/MM/CCYY	ZZ,ZZ9.99  ZZ,ZZ9.99  ZZ,ZZ9.99
+11111 EMP NAME-1  DD/MM/CCYY	ZZ,ZZ9.99  ZZ,ZZ9.99  ZZ,ZZ9.99
+11111 EMP NAME-1  DD/MM/CCYY	ZZ,ZZ9.99  ZZ,ZZ9.99  ZZ,ZZ9.99
+
+TECH TOTALS	  Z9	       ZZZ,ZZ9.99 ZZZ,ZZ9.99 ZZZ,ZZ9.99
+
+	****  END OF PAGE ****
+
+DATE: DD/MM/CCYY					TIME: HH:MM:SS
+LISTING OF EMPLOYEES					PAGE: 02
+
+LOC: L-1	TECH: TCH-2
+ID    NAME	  BIRTH DATE	 EARNINGS DEDUCTIONS  TOTAL SAL
+11111 EMP NAME-1  DD/MM/CCYY	ZZ,ZZ9.99  ZZ,ZZ9.99  ZZ,ZZ9.99
+11111 EMP NAME-1  DD/MM/CCYY	ZZ,ZZ9.99  ZZ,ZZ9.99  ZZ,ZZ9.99
+11111 EMP NAME-1  DD/MM/CCYY	ZZ,ZZ9.99  ZZ,ZZ9.99  ZZ,ZZ9.99
+
+TECH TOTALS	  Z9	       ZZZ,ZZ9.99 ZZZ,ZZ9.99 ZZZ,ZZ9.99
+LOC  TOTALS	  Z9	       ZZZ,ZZ9.99 ZZZ,ZZ9.99 ZZZ,ZZ9.99
+
+	****  END OF PAGE ****
+
+DATE: DD/MM/CCYY					TIME: HH:MM:SS
+LISTING OF EMPLOYEES					PAGE: 03
+
+LOC: L-2	TECH: TCH-3
+ID    NAME	  BIRTH DATE	 EARNINGS DEDUCTIONS  TOTAL SAL
+11111 EMP NAME-1  DD/MM/CCYY	ZZ,ZZ9.99  ZZ,ZZ9.99  ZZ,ZZ9.99
+11111 EMP NAME-1  DD/MM/CCYY	ZZ,ZZ9.99  ZZ,ZZ9.99  ZZ,ZZ9.99
+11111 EMP NAME-1  DD/MM/CCYY	ZZ,ZZ9.99  ZZ,ZZ9.99  ZZ,ZZ9.99
+
+TECH TOTALS	  Z9	       ZZZ,ZZ9.99 ZZZ,ZZ9.99 ZZZ,ZZ9.99
+
+	****  END OF PAGE ****
+
+DATE: DD/MM/CCYY					TIME: HH:MM:SS
+LISTING OF EMPLOYEES					PAGE: 04
+
+LOC: L-2	TECH: TCH-04
+ID    NAME	  BIRTH DATE	 EARNINGS DEDUCTIONS  TOTAL SAL
+11111 EMP NAME-1  DD/MM/CCYY	ZZ,ZZ9.99  ZZ,ZZ9.99  ZZ,ZZ9.99
+11111 EMP NAME-1  DD/MM/CCYY	ZZ,ZZ9.99  ZZ,ZZ9.99  ZZ,ZZ9.99
+11111 EMP NAME-1  DD/MM/CCYY	ZZ,ZZ9.99  ZZ,ZZ9.99  ZZ,ZZ9.99
+
+TECH TOTALS	  Z9	       ZZZ,ZZ9.99 ZZZ,ZZ9.99 ZZZ,ZZ9.99
+LOC  TOTALS	  Z9	       ZZZ,ZZ9.99 ZZZ,ZZ9.99 ZZZ,ZZ9.99
+
+	****  END OF PAGE ****
+
+DATE: DD/MM/CCYY					TIME: HH:MM:SS
+LISTING OF EMPLOYEES					PAGE: 05
+
+COMPANY TOTALS 	   Z9	       ZZZ,ZZ9.99 ZZZ,ZZ9.99 ZZZ,ZZ9.99
+
+	****  END OF REPORT ****
+======================================================================
+WORKING-STORAGE SECTION.
+01  PREV-LOC	PIC X(03) VALUE SPACES.
+01  PREV-TECH	PIC X(05) VALUE SPACES.
+PROCEDURE DIVISION.
+MAIN-PARA.
+    PERFORM INIT-PARA
+    PERFORM PROCESS-PARA  UNTIL  END-OF-FILE.
+    PERFORM TERM-PARA.
+    STOP RUN.
+INIT-PARA.
+    OPEN INPUT EMPLOYEE-FILE
+    OPEN OUTPUT REPORT-FILE
+    PERFORM READ-EMPLOYEE
+    MOVE EMP-LOC	TO PREV-LOC
+    MOVE EMP-TECH	TO PREV-TECH.
+READ-EMPLOYEE.
+    READ EMPLOYEE-FILE
+       AT END
+	  MOVE 'Y' TO WS-FILE-FLAG
+     END-READ.
+PROCESS-PARA.
+    IF EMP-LOC = PREV-LOC
+       IF EMP-TECH = PREV-TECH
+	  NEXT SENTENCE
+       ELSE
+	  PERFORM TECH-CHANGE-PARA
+       END-IF
+    ELSE
+       PERFORM TECH-CHANGE-PARA
+       PERFORM LOC-CHANGE-PARA
+    END-IF.
+    PERFORM PROCESS-EMPLOYEE
+    PERFORM READ-EMPLOYEE.
+TECH-CHANGE-PARA.
+    Total Fields = (Emp Count, Earnings, Deductions & Salary)
+    Move Tech Total Fields to TECH-TOTAL-LINE & Write it.
+    Add Tech Total Fieldss to Loc Total Fields
+    Initialize Tech Total Fields, Line Count
+    MOVE EMP-TECH TO PREV-TECH.
+LOC-CHANGE-PARA.
+    Total Fields = (Emp Count, Earnings, Deductions & Salary)
+    Move Loc Total Fields to LOC-TOTAL-LINE & Write it.
+    Add Loc Total Fields to Company Total Fields
+    Initialize Loc Total Fields
+    MOVE EMP-LOC TO PREV-LOC.
+PROCESS-EMPLOYEE.
+    Calculate Emp Sal = Earn - Dedn; Increment Emp Count
+    Add Emp Count, Earn, Dedn & Sal to Tech Total Fields
+    Check Line Count, Print Headers if required.
+    Move Emp Details (Id, Name, DOB, Earn, Dedn & Salary)
+    to Fields in DETAIL-LINE & Write it, Increment Line Count
+TERM-PARA.
+    PERFORM TECH-CHANGE-PARA
+    PERFORM LOC-CHANGE-PARA.
+    PERFORM HEADING-PARA
+    Total Fields = (Emp Count, Earnings, Deductions & Salary)
+    Move Company Total Fields to COMP-TOTAL-LINE & Write it.
+    CLOSE EMPLOYEE-FILE, REPORT-FILE.
++++++++++++++++++++++++++++++++++++++
+Let us assume that Employee File has the following Records sorted in the order of Location & Technology SORT FIELDS=(21,3,CH,A,24,5,CH,A)
+	E1 L1 T1
+	E2 L1 T1
+	E3 L1 T2
+	E4 L1 T2
+	E5 L2 T3
+	E6 L2 T3
+	E7 L2 T4
+	E8 L2 T4
+Program will be executed as given below -
+
+Init Para
+	Reads Rec E1
+	Moves Curr Loc & Tech to Hold Loc & Tech
+Process Para
+	Since Curr Fields = Hold Fields
+	Prints the Employee Details & Accumulates Totals
+	Reads Rec E2
+	Since Curr Fields = Hold Fields
+	Prints the Employee Details & Accumulates Totals
+	Reads Rec E3 - Tech has changed
+	Prints Tech Totals, Adds to Loc Totals, Initializes Tech Totals
+	Prints the Employee Details & Accumulates Totals
+	Reads Rec E4
+	Since Curr Fields = Hold Fields
+	Prints the Employee Details & Accumulates Totals
+	Reads Rec E5 - Loc has changed
+	Prints Tech Totals, Adds to Loc Totals, Initializes Tech Totals
+	Prints Loc Totals, Add to Comp Totals, Initializes Loc Totals
+	Prints the Employee Details & Accumulates Totals
+	Reads Rec E6
+	Since Curr Fields = Hold Fields
+	Prints the Employee Details & Accumulates Totals
+	Reads Rec E7 - Tech has changed
+	Prints Tech Totals, Adds to Loc Totals, Initializes Tech Totals
+	Prints the Employee Details & Accumulates Totals
+	Reads Rec E8
+	Since Curr Fields = Hold Fields
+	Prints the Employee Details & Accumulates Totals
+	End of File has been reached
+Termination Para
+	Prints Tech Totals, Adds to Loc Totals, Initializes Tech Totals
+	Prints Loc Totals, Add to Comp Totals, Initializes Loc Totals
+        Print Comp Totals
++++++++++++++++++++++++++

@@ -1,0 +1,9 @@
+000100 //DSRP152A JOB LA2719,'XYZ',NOTIFY=&SYSUID        
+000200 //PROC1 PROC                                      
+000300 //S1      EXEC PGM=CHAP1                          
+000400 //STEPLIB DD  DSN=&HQ,DISP=SHR                    
+000410 //SYSPRINT DD SYSOUT=*                            
+000420 //SYSOUT   DD SYSOUT=*                            
+000500 //   PEND                                         
+000600 //STEP1 EXEC PROC=PROC1,HQ=DSRP152.MFT.LOADLIB    
+000900 //                                                

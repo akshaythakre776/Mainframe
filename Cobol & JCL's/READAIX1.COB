@@ -1,0 +1,122 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. READAIX1.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT EMPLOYEE-MASTER ASSIGN TO 'EMPMAST.DAT'
+       	ORGANIZATION IS INDEXED
+       	ACCESS MODE  IS DYNAMIC
+       	RECORD KEY   IS EMP-ID
+       	ALTERNATE RECORD KEY IS EMP-LOC WITH DUPLICATES
+       	ALTERNATE RECORD KEY IS EMP-TECH WITH DUPLICATES
+	     FILE STATUS  IS WS-FILE-STAT.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  EMPLOYEE-MASTER.
+       01  MASTER-RECORD.
+           03  EMP-ID              PIC X(05).
+           03  EMP-NAME            PIC X(15).
+           03  EMP-LOC             PIC X(03).
+           03  EMP-TECH            PIC X(05).
+           03  EMP-DOB             PIC 9(08).
+           03  EMP-EARN            PIC 9(5)V99.
+           03  EMP-DEDN            PIC 9(5)V99.
+       WORKING-STORAGE SECTION.
+       01  WS-EMP-ID			PIC X(05).
+       01  WS-EMP-LOC			PIC X(03).
+       01  WS-EMP-TECH         PIC X(05)
+       01  WS-FILE-STAT		PIC X(02).
+       01  WS-TEXT			PIC X(04).
+       01  WS-FILE-FLAG		PIC X(01) VALUE 'N'.
+           88  END-OF-FILE			  VALUE 'Y'.    
+       PROCEDURE DIVISION.
+       MAIN-PARA.
+           OPEN INPUT EMPLOYEE-MASTER
+           PERFORM PARA-EMP-ID
+           PERFORM PARA-EMP-LOC
+           PERFORM PARA-EMP-TECH
+           CLOSE EMPLOYEE-MASTER
+           STOP RUN.
+       PARA-EMP-ID.
+           DISPLAY 'ENTER EMP ID ', WITH NO ADVANCING
+           ACCEPT WS-EMP-ID
+           MOVE WS-EMP-ID TO EMP-ID
+           READ EMPLOYEE-MASTER
+           	INVALID KEY
+           	   DISPLAY 'EMP NOT FOUND'
+           	NOT INVALID KEY
+           	   DISPLAY 'EMP ', MASTER-RECORD
+           END-READ
+           START EMPLOYEE-MASTER
+           	KEY > EMP-ID
+           	  INVALID KEY
+           		DISPLAY 'START NOT SUCCESSFUL'
+           	  NOT INVALID KEY
+           		DISPLAY 'START WAS SUCCESSFUL'
+           		PERFORM DISPLAY-EMP-PARA
+           END-START.
+       DISPLAY-EMP-PARA.
+           PERFORM UNTIL END-OF-FILE
+           	READ EMPLOYEE-MASTER NEXT
+           	   AT END
+               		MOVE 'Y' TO WS-FILE-FLAG
+           	   NOT AT END
+               		DISPLAY 'EMP ', MASTER-RECORD
+           	END-READ
+           END-PERFORM
+           DISPLAY 'END OF EMPLOYEE DETAILS'
+           DISPLAY '**-------------------**'.
+       PARA-EMP-LOC.
+           DISPLAY 'ENTER EMP LOC ', WITH NO ADVANCING
+           ACCEPT WS-EMP-LOC
+           MOVE WS-EMP-LOC TO EMP-LOC
+           START EMPLOYEE-MASTER
+           	KEY = EMP-LOC
+           	  INVALID KEY
+           		DISPLAY 'START NOT SUCCESSFUL'
+           	  NOT INVALID KEY
+           		DISPLAY 'START WAS SUCCESSFUL'
+           		PERFORM DISPLAY-LOC-PARA
+           END-START.
+       DISPLAY-LOC-PARA.
+           MOVE 'N' TO WS-FILE-FLAG
+           PERFORM UNTIL END-OF-FILE
+           	READ EMPLOYEE-MASTER NEXT
+           	IF WS-FILE-STAT = '00'
+           		MOVE 'LAST' TO WS-TEXT
+            		MOVE 'Y' TO WS-FILE-FLAG
+               END-IF
+       	    IF WS-FILE-STAT = '02'
+           		MOVE 'NEXT' TO WS-TEXT
+	         END-IF
+               DISPLAY WS-TEXT, ' EMP ', MASTER-RECORD
+           END-PERFORM.
+           DISPLAY 'END OF LOCATION DETAILS'
+           DISPLAY '**-------------------**'.
+       PARA-EMP-TECH.
+           DISPLAY 'ENTER EMP TECH ', WITH NO ADVANCING
+           ACCEPT WS-EMP-TECH
+           MOVE WS-EMP-TECH TO EMP-TECH
+           START EMPLOYEE-MASTER
+           	KEY = EMP-TECH
+           	  INVALID KEY
+           		DISPLAY 'START NOT SUCCESSFUL ', WS-FILE-STAT
+           	  NOT INVALID KEY
+           		DISPLAY 'START WAS SUCCESSFUL'
+           		PERFORM DISPLAY-TECH-PARA
+           END-START.
+       DISPLAY-TECH-PARA.
+           MOVE 'N' TO WS-FILE-FLAG
+           PERFORM UNTIL END-OF-FILE
+           	READ EMPLOYEE-MASTER NEXT
+           	IF WS-FILE-STAT = '00'
+           		MOVE 'LAST' TO WS-TEXT
+            		MOVE 'Y' TO WS-FILE-FLAG
+               END-IF
+       	    IF WS-FILE-STAT = '02'
+           		MOVE 'NEXT' TO WS-TEXT
+	         END-IF
+               DISPLAY WS-TEXT, ' EMP ', MASTER-RECORD
+           END-PERFORM
+           DISPLAY 'END OF TECHNOLOGY DETAILS'
+           DISPLAY '**---------------------**'.

@@ -1,0 +1,70 @@
+000100 IDENTIFICATION DIVISION.                                         00010000
+000200 PROGRAM-ID. DB2SLF.                                              00020000
+000300 ENVIRONMENT DIVISION.                                            00030000
+000400 DATA DIVISION.                                                   00040000
+000500 WORKING-STORAGE SECTION.                                         00050000
+000501 01 WS-SQL-ERROR PIC -9(4).                                       00050100
+000502 01 WS-MGR-NAME  PIC X(10).                                       00050200
+000503     EXEC SQL                                                     00050300
+000504        INCLUDE EMPS                                              00050400
+000505     END-EXEC.                                                    00050500
+000506     EXEC SQL                                                     00050600
+000507        INCLUDE DEPT                                              00050700
+000508     END-EXEC.                                                    00050800
+000509     EXEC SQL                                                     00050900
+000510        INCLUDE SQLCA                                             00051000
+000511     END-EXEC.                                                    00051100
+000512     EXEC SQL                                                     00051200
+000513        DECLARE EMPJOIN CURSOR FOR                                00051300
+000514        SELECT A.EID, A.ENAME, B.ENAME "MANAGER"                  00051400
+000515        FROM EMPS A, EMPS B                                       00051500
+000516        WHERE A.MGR = B.EID                                       00051601
+000517     END-EXEC.                                                    00051700
+000518 PROCEDURE DIVISION.                                              00051800
+000519 0000-MAIN-PARA.                                                  00051900
+000520     PERFORM 1000-OPEN-CURSOR-PARA THRU 1000-EXIT-OPEN-PARA .     00052000
+000521     PERFORM 2000-FETCH-CURSOR-PARA THRU                          00052100
+000530          2000-EXIT-FETCH-PARA UNTIL SQLCODE = 100 .              00053000
+000540     PERFORM 3000-CLOSE-CURSOR-PARA THRU                          00054000
+000550          3000-EXIT-CLOSE-PARA .                                  00055000
+000560     STOP RUN.                                                    00056000
+000570 0000-EXIT-MAIN-PARA.                                             00057000
+000580     EXIT.                                                        00058000
+000590*                                                                 00059000
+000600 0001-ERROR-PARA .                                                00060000
+000700     MOVE SQLCODE TO WS-SQL-ERROR.                                00070000
+000701     DISPLAY  ' SQL ERROR   '   WS-SQL-ERROR.                     00070100
+000702 0001-EXIT-ERROR-PARA.                                            00070200
+000703     EXIT.                                                        00070300
+000704*                                                                 00070400
+000705 1000-OPEN-CURSOR-PARA.                                           00070500
+000706     EXEC SQL                                                     00070600
+000707        OPEN EMPJOIN                                              00070700
+000708     END-EXEC.                                                    00070800
+000709 1000-EXIT-OPEN-PARA .                                            00070900
+000710     EXIT.                                                        00071000
+000720*                                                                 00072000
+000730 2000-FETCH-CURSOR-PARA.                                          00073000
+000740     EXEC SQL                                                     00074000
+000750       WHENEVER SQLERROR GO TO 0001-ERROR-PARA                    00075000
+000760*      0001-EXIT-ERROR-PARA                                       00076000
+000770     END-EXEC.                                                    00077000
+000780     EXEC SQL                                                     00078000
+000790       FETCH EMPJOIN INTO :WS-EID,:WS-ENAME,:WS-MGR-NAME          00079000
+000800     END-EXEC.                                                    00080000
+000810*    MOVE SQLCODE TO WS-SQL-ERROR.                                00081000
+000820*    DISPLAY 'SQL ERROR AFTER FETCH : ' WS-SQL-ERROR.             00082000
+000830     IF SQLCODE = 100                                             00083000
+000840       PERFORM 3000-CLOSE-CURSOR-PARA THRU 3000-EXIT-CLOSE-PARA   00084000
+000850       STOP RUN                                                   00085000
+000860     END-IF.                                                      00086000
+000870     DISPLAY WS-EID , '  ' , WS-ENAME , ' ' , WS-MGR-NAME.        00087002
+000880 2000-EXIT-FETCH-PARA .                                           00088000
+000890     EXIT.                                                        00089000
+000900 3000-CLOSE-CURSOR-PARA .                                         00090000
+001000       EXEC SQL                                                   00100000
+001100         CLOSE EMPJOIN                                            00110000
+001200       END-EXEC .                                                 00120000
+001300 3000-EXIT-CLOSE-PARA .                                           00130000
+001400     EXIT.                                                        00140000
+

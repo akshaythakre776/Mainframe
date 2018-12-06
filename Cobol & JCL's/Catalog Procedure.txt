@@ -1,0 +1,32 @@
+//DSRP154V JOB CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID
+//STEP01 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *                                                   
+ DELETE DSRP154.AMOGH.KSDS CLUSTER PURGE                       
+ SET MAXCC=0                                                   
+ DEFINE CLUSTER (NAME(DSRP154.AMOGH.KSDS) -                    
+        TRACKS(1 1) -
+	KEYS(5 0) -                                          
+        RECORDSIZE(50 50) -                                    
+        INDEXED ) -                                                    
+        DATA (NAME(DSRP154.AMOGH.KSDS.DATA) )-                  
+        INDEX (NAME(DSRP154.AMOGH.KSDS.INDEX) )                  
+/*
+//STEP02 EXEC PGM=SORT                                         
+//SYSOUT   DD SYSOUT=*                                         
+//SORTIN   DD DSN=DSRP154.AMOGH.PSINPUT,DISP=SHR               
+//SORTOUT  DD DSN=&&TEMP,DISP=(NEW,PASS),                      
+//         DCB=(RECFM=FB,LRECL=50,BLKSIZE=5000),               
+//         SPACE=(TRK,(1,1),RLSE)                              
+//SYSIN DD *                                                   
+   SORT FIELDS=(1,5,CH,A)                                      
+/*                                                             
+//STEP03 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//FILE1    DD DSN=&&TEMP,DISP=OLD                              
+//FILE2    DD DSN=DSRP154.AMOGH.KSDS,DISP=SHR                  
+//SYSIN DD *                                                   
+  REPRO INFILE(FILE1) -
+       OUTFILE(FILE2) -
+       REPLACE         
+/*

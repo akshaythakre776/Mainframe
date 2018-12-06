@@ -1,0 +1,44 @@
+IDENTIFICATION DIVISION.
+       PROGRAM-ID. PROGRAM1.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT EMPLOYEE-FILE ASSIGN TO 'EMPLOYEE.DAT'
+           ORGANIZATION IS SEQUENTIAL
+           ACCESS MODE  IS SEQUENTIAL.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  EMPLOYEE-FILE.             
+         01  EMPLOYEE-RECORD.
+             03  EMP-ID         PIC X(05).
+             03  EMP-NAME       PIC X(20).
+             03  EMP-CITY       PIC X(03).
+             03  EMP-DOB        PIC 9(08).
+             03  EMP-EARN       PIC 9(5)V99.
+             03  EMP-DEDN       PIC 9(5)V99. 
+       WORKING-STORAGE SECTION.
+       01  WS-FILE-FLAG PIC X(01) VALUE 'N'.
+           88  END-OF-FILE        VALUE 'Y'.
+       01 TOTAL-SALARY       PIC 9(05) VALUE ZERO.
+       PROCEDURE DIVISION.
+       MAIN-PARA.
+           OPEN INPUT EMPLOYEE-FILE
+           PERFORM  UNTIL  END-OF-FILE
+           READ EMPLOYEE-FILE
+             AT END
+                MOVE 'Y' TO WS-FILE-FLAG
+         
+           NOT AT END
+                DISPLAY 'EMPLOYEE_ID ', EMP-ID
+                DISPLAY 'EMPLOYEE_NAME ', EMP-NAME
+                DISPLAY 'EMPLOYEE_CITY ', EMP-CITY
+                DISPLAY 'EMPLOYEE_DOB ', EMP-DOB
+                DISPLAY 'EMPLOYEE_EARN ', EMP-EARN
+                DISPLAY 'EMPLOYEE_DEDN ', EMP-DEDN
+                DISPLAY '************************************'
+               END-READ
+           END-PERFORM
+           DISPLAY 'END OF FILE REACHED'
+           DISPLAY 'TOTAL SALARY: ', TOTAL-SALARY
+           CLOSE EMPLOYEE-FILE   
+           STOP RUN.

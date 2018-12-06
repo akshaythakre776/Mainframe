@@ -1,0 +1,102 @@
+IDENTIFICATION DIVISION.
+PROGRAM-ID. MPROG1.
+DATA DIVISION.
+WORKING-STORAGE SECTION.
+01  WS-F1	PIC X(05).
+01  WS-F2	PIC 9(05).
+PROCEDURE DIVSION.
+MAIN-PARA.
+    CALL 'SPROG1' USING WS-F1, WS-F2.
+    DISPLAY 'I1 ', WS-F1, ' I2 ', WS-F2.
+    STOP RUN.
+++++++++++++
+IDENTIFICATION DIVISION.
+PROGRAM-ID. SPROG1.
+DATA DIVISION.
+LINKAGE SECTION.
+01  LK-F1	PIC X(05).
+01  LK-F2	PIC 9(05).
+PROCEDURE DIVISION USING LK-F1, LK-F2.
+MAIN-PARA.
+    MOVE 'HELLO' TO LK-F1
+    MOVE 12345 TO LK-F2
+    GOBACK.
+===============================================================
+IDENTIFICATION DIVISION.
+PROGRAM-ID. MPROG2.
+DATA DIVISION.
+WORKING-STORAGE SECTION.
+01  WS-PROG-NAME	PIC X(08) VALUE 'SPROG2'.
+01  WS-F1		PIC X(05).
+01  WS-F2		PIC 9(05).
+PROCEDURE DIVSION.
+MAIN-PARA.
+    CALL WS-PROG-NAME USING WS-F1, WS-F2.
+    DISPLAY 'I1 ', WS-F1, ' I2 ', WS-F2.
+    STOP RUN.
+++++++++++++
+IDENTIFICATION DIVISION.
+PROGRAM-ID. SPROG2.
+DATA DIVISION.
+LINKAGE SECTION.
+01  LK-F1		PIC X(05).
+01  LK-F2		PIC 9(05).
+PROCEDURE DIVISION USING LK-F1, LK-F2.
+MAIN-PARA.
+    MOVE 'HELLO' TO LK-F1
+    MOVE  12345	 TO LK-F2
+    GOBACK.
+===============================================================
+IDENTIFICATION DIVISION.
+PROGRAM-ID. MPROG3.
+DATA DIVISION.
+WORKING-STORAGE SECTION.
+01  WS-PROG-NAME	PIC X(08) VALUE SPACES.
+01  WS-F1		PIC X(05).
+01  WS-F2		PIC 9(05).
+01  WS-INPUT		PIC 9(01).
+PROCEDURE DIVSION.
+MAIN-PARA.
+    ACCEPT WS-INPUT.
+    IF WS-INPUT < 5
+	MOVE 'SPROG3' TO WS-PROG-NAME
+    ELSE
+	MOVE 'SPROG4' TO WS-PROG-NAME
+    END-IF
+    CALL WS-PROG-NAME USING WS-F1, WS-F2.
+    DISPLAY 'I1 ', WS-F1, ' I2 ', WS-F2.
+    STOP RUN.
+++++++++++++
+Main Program Specifications =
+1) Call the Sub Program to populate the Location Table
+2) Read the Employee File sequentially
+3) Use Emp Loc to Search the Location Table & get the Loc Name
+4) For every record read, Display the following -
+   Emp ID, Emp Name, Loc Name & other Details
+
+Sub Program Specifications =
+1) Receive the Location Table
+2) Read the Location File sequentially
+3) For every record read, populate Location Table with Loc Code & Loc Name
+4) Pass control back to the Main Program
+
+01  LOCATION-TABLE.
+    03  WS-LOCATION-TABLE	OCCURS 10 TIMES.
+	05  LOC-CODE		PIC X(03).
+	05  LOC-NAME		PIC X(12).
+
+01  LOCATION-RECORD.
+    03  LOC-CODE		PIC X(03).
+    03  LOC-NAME		PIC X(12).
+==========================================
+
+
+
+
+
+
+
+
+
+
+

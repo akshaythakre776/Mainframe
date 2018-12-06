@@ -1,0 +1,57 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CLOCPROG.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT LOCATION-FILE ASSIGN TO 'LOCATION.DAT'
+           ORGANIZATION IS SEQUENTIAL
+           ACCESS MODE  IS SEQUENTIAL
+           FILE STATUS  IS WS-FILE-STAT.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  LOCATION-FILE
+           RECORD CONTAINS 15 CHARACTERS.
+       01  LOCATION-RECORD.
+           03  LOC-CODE            PIC X(03).
+           03  LOC-NAME            PIC X(12).
+       WORKING-STORAGE SECTION.
+       01  WS-FILE-STAT            PIC X(02).
+       01  LOC-SUB                 PIC 9(02) VALUE 1.
+       01  WS-FILE-FLAG            PIC X(01) VALUE 'N'.
+           88  END-OF-FILE         VALUE 'Y'.
+       LINKAGE SECTION.
+       01  LK-LOCATION-TABLE.
+           03  LOCATION-TABLE      OCCURS 10 TIMES. 
+               05  LK-LOC-CODE     PIC X(03).
+               05  LK-LOC-NAME     PIC X(12).
+       PROCEDURE DIVISION USING LK-LOCATION-TABLE.
+       0000-MAIN-PARA.
+           PERFORM 1000-INITIALIZATION-PARA.
+           PERFORM 2000-PROCESS-PARA  UNTIL  END-OF-FILE
+           PERFORM 9000-TERMINATION-PARA.
+           GOBACK.
+       1000-INITIALIZATION-PARA.
+           OPEN INPUT LOCATION-FILE
+           IF WS-FILE-STAT = '00'
+               DISPLAY 'LOCATION FILE OPENED SUCCESSFULLY'
+           END-IF.
+           DISPLAY '**--------------------**'
+           DISPLAY 'START OF THE SUB-ROUTINE'
+           PERFORM 1500-READ-LOCATION.
+       2000-PROCESS-PARA.
+           IF LOC-SUB > 10
+               MOVE 'Y' TO WS-FILE-FLAG
+           ELSE
+               MOVE LOCATION-RECORD TO LOCATION-TABLE(LOC-SUB)
+               ADD 1 TO LOC-SUB
+           END-IF
+           PERFORM 1500-READ-LOCATION.
+       1500-READ-LOCATION.
+           READ LOCATION-FILE
+               AT END
+                   MOVE 'Y' TO WS-FILE-FLAG
+           END-READ.              
+       9000-TERMINATION-PARA.
+           DISPLAY 'END   OF THE SUB-ROUTINE'
+           DISPLAY '**--------------------**'
+           CLOSE LOCATION-FILE.

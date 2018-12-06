@@ -1,0 +1,8 @@
+ 000100 //DSRP152A JOB ACCT#,CLASS=A,NOTIFY=&SYSUID,MSGCLASS=A   
+ 000200 //S1 EXEC PGM=IEBGENER                                   
+ 000300 //SYSPRINT DD SYSOUT=*                                   
+ 000400 //SYSUT1 DD DSN=DSRP152.MFT.LAB(SORT1),DISP=SHR          
+ 000500 //       DD DSN=DSRP152.MFT.LAB(SORT2),DISP=SHR          
+ 000600 //SYSUT2 DD DSN=DSRP152.MFT.LAB(SORT3),DISP=SHR          
+ 000700 //SYSIN DD DUMMY                                         
+ 000800 //                                                       

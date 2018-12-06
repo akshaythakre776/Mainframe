@@ -1,0 +1,134 @@
+IDENTIFICATION DIVISION.
+PROGRAM-ID. READVSAM.
+ENVIRONMENT DIVISION.
+INPUT-OUTPUT SECTION.
+FILE-CONTROL.
+    SELECT EMPLOYEE-FILE ASSIGN TO 'EMPMAST.DAT'
+	ORGANIZATION IS INDEXED
+	ACCESS MODE  IS RANDOM
+	RECORD KEY   IS EMP-ID
+	FILE STATUS  IS WS-FILE-STAT.
+DATA DIVISION.
+FILE SECTION.
+FD  EMPLOYEE-FILE.
+01  EMPLOYEE-RECORD.
+    03  EMP-ID		PIC X(05).
+    03  FILLER		PIC X(45).
+WORKING-STORAGE SECTION.
+01  WS-FILE-STAT	PIC X(02).
+01  WS-EMP-ID		PIC X(05).1
+PROCEDURE DIVISION.
+MAIN-PARA.
+    OPEN INPUT EMPLOYEE-FILE
+    ACCEPT WS-EMP-ID.
+    MOVE WS-EMP-ID TO EMP-ID
+    READ EMPLOYEE-FILE
+	KEY IS EMP-ID
+	   INVALID KEY
+		DISPLAY 'EMPLOYEE DOES NOT EXIST'
+	   NOT INVALID KEY
+		DISPLAY 'EMP FOUND ', EMPLOYEE-RECORD
+    END-READ
+    CLOSE EMPLOYEE-FILE
+    STOP RUN.
+========================================================================
+PProgram Specifications = To Update the Employee Master File with records
+from the Transaction File.
+
+This Program consists of 2 Input Files & 1 Output File. The Files are as follows -
+
+1) Employee Master (VSAM KSDS). Record Layout of 50 Bytes
+01  MASTER-RECORD.
+    03  EMP-ID		PIC X(05).
+    03  EMP-NAME	PIC X(15).
+    03  EMP-LOC		PIC X(03).
+    03  EMP-TECH	PIC X(05).
+    03  EMP-DOB		PIC 9(08).
+    03  EMP-EARN	PIC 9(5)V99.
+    03  EMP-DEDN	PIC 9(5)V99.
+
+2) Transaction File (PS File). Record Layout of 51 Bytes
+01  TRANSACTION-RECORD.
+    03  T-ACTION-CODE	PIC X(01).
+    03  T-DATA.
+	05  T-EMP-ID	PIC X(05).
+	05  T-EMP-NAME	PIC X(15).
+	05  T-EMP-LOC	PIC X(03).
+	05  T-EMP-TECH	PIC X(05).
+	05  T-EMP-DOB	PIC 9(08).
+	05  T-EMP-EARN	PIC 9(5)V99.
+	05  T-EMP-DEDN	PIC 9(5)V99.
+
+3) Error File (PS File). Record Layout of 80 Bytes. First 51 Bytes are same as Transaction File, remaining contain the suitable Message.
+
+Processing Rules:
+1) Read records from Transaction File sequentially.
+2) For every record read, based on Action Code, process as follows -
+A = Check if Employee exists in Master
+    If Employee exists
+	Write Transaction Record to Error File with suitable Message
+    Else
+	Insert Record into Employee Master
+U = Check if Employee exists in Master
+    If Employee exists
+	Update Record in the Employee Master
+    Else
+	Write Transaction Record to Error File with suitable Message
+D = Check if Employee exists in Master
+    If Employee exists
+	Delete Record from the Employee Master
+    Else
+	Write Transaction Record to Error File with suitable Message
+Any other Value = Write Transaction Record to Error File with suitable Message
+======================================================================
+INSERT-PARA.
+    WRITE MASTER-RECORD FROM TRANSACTION-RECORD
+	INVALID KEY
+	   DISPLAY 'DUPLICATE RECORD EXISTS'
+	NOT INVALID KEY
+	   DISPLAY 'RECORD INSERTED SUCCESSFULLY'
+    END-WRITE.
+DELETE-PARA.
+    MOVE T-EMP-ID TO EMP-ID
+    DELETE EMPLOYEE-MASTER
+	INVALID KEY
+	   DISPLAY 'RECORD DOES NOT EXIST'
+	NOT INVALID KEY
+	   DISPLAY 'RECORD DELETED SUCCESSFULLY'
+    END-DELETE.
+UPDATE-PARA.
+    MOVE T-EMP-ID TO EMP-ID
+    REWRITE MASTER-RECORD FROM TRANSACTION-RECORD
+	INVALID KEY
+	   DISPLAY 'RECORD DOES NOT EXIST'
+	NOT INVALID KEY
+	   DISPLAY 'RECORD UPDATED SUCCESSFULLY'
+    END-REWRITE.
+READ-PARA.
+    MOVE T-EMP-ID TO EMP-ID
+    READ EMPLOYEE-MASTER
+	INVALID KEY
+	   DISPLAY 'RECORD DOES NOT EXIST'
+	NOT INVALID KEY
+	   DISPLAY 'RECORD READ SUCCESSFULLY'
+    END-READ.
++++++++++++++
+The File Status Values are as follows -
+
+For READ
+00 = Success
+10 = End of File
+23 = Record Not Found
+
+For WRITE, the 
+00 = Success
+22 = Duplicate
+
+For REWRITE
+00 = Success
+23 = Record Not Found
+
+For DELETE
+00 = Success
+23 = Record Not Found
+==============================================================

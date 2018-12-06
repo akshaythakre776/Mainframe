@@ -1,0 +1,72 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CRTEVSAM.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT EMPLOYEE-FILE ASSIGN TO 'EMPLOYEE.DAT'
+           ORGANIZATION IS SEQUENTIAL
+           ACCESS MODE  IS SEQUENTIAL
+           FILE STATUS  IS WS-FILE-STAT1.
+           
+           SELECT EMPLOYEE-MASTER ASSIGN TO 'EMPMAST.DAT'
+           ORGANIZATION IS INDEXED
+           ACCESS MODE  IS SEQUENTIAL
+           RECORD KEY   IS EMP-ID
+           ALTERNATE RECORD KEY IS EMP-LOC  WITH DUPLICATES
+           ALTERNATE RECORD KEY IS EMP-TECH WITH DUPLICATES
+           FILE STATUS  IS WS-FILE-STAT2.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  EMPLOYEE-FILE
+           RECORD CONTAINS 50 CHARACTERS.
+       01  EMPLOYEE-RECORD.
+           03  T-EMP-ID        PIC X(05).
+           03  FILLER          PIC X(45).
+       FD  EMPLOYEE-MASTER
+           RECORD CONTAINS 50 CHARACTERS.
+       01  MASTER-RECORD.
+           03  EMP-ID              PIC X(05).
+           03  EMP-NAME            PIC X(15).
+           03  EMP-LOC             PIC X(03).
+           03  EMP-TECH            PIC X(05).
+           03  EMP-DOB             PIC 9(08).
+           03  EMP-EARN            PIC 9(5)V99.
+           03  EMP-DEDN            PIC 9(5)V99.           
+       WORKING-STORAGE SECTION.
+       01  WS-FILE-STAT1           PIC X(02).
+       01  WS-FILE-STAT2           PIC X(02).
+       01  WS-FILE-FLAG            PIC X(01) VALUE 'N'.
+           88  END-OF-FILE         VALUE 'Y'.
+       PROCEDURE DIVISION.
+       0000-MAIN-PARA.
+           PERFORM 1000-INITIALIZATION-PARA.
+           PERFORM 2000-PROCESS-PARA  UNTIL  END-OF-FILE
+           PERFORM 9000-TERMINATION-PARA.
+           STOP RUN.
+       1000-INITIALIZATION-PARA.
+           OPEN INPUT EMPLOYEE-FILE
+           IF WS-FILE-STAT1 = '00'
+               DISPLAY 'EMPLOYEE FILE OPENED SUCCESSFULLY'
+           END-IF.
+           OPEN OUTPUT EMPLOYEE-MASTER
+           IF WS-FILE-STAT2 = '00'
+               DISPLAY 'EMPLOYEE MASTER OPENED SUCCESSFULLY'
+           END-IF.
+           PERFORM 1500-READ-EMPLOYEE.
+       2000-PROCESS-PARA.
+           MOVE EMPLOYEE-RECORD TO MASTER-RECORD
+           WRITE MASTER-RECORD
+               INVALID KEY
+                   DISPLAY 'UNABLE TO WRITE ', T-EMP-ID
+               NOT INVALID KEY
+                   DISPLAY 'WRITE SUCCESSFUL ', T-EMP-ID
+           END-WRITE.
+           PERFORM 1500-READ-EMPLOYEE.
+       1500-READ-EMPLOYEE.
+           READ EMPLOYEE-FILE
+               AT END
+                   MOVE 'Y' TO WS-FILE-FLAG
+           END-READ.              
+       9000-TERMINATION-PARA.
+           CLOSE EMPLOYEE-FILE,
+                 EMPLOYEE-MASTER.

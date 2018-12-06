@@ -1,0 +1,78 @@
+--CREATE TABLE DEPT                                                     00000100
+--   ( DEPTNO  SMALLINT NOT NULL,                                       00000200
+--     DNAME   VARCHAR(32) NOT NULL,                                    00000300
+--     LOC     CHAR(16),                                                00000400
+--     PRIMARY KEY (DEPTNO)                                             00000500
+--   )                                                                  00000600
+--   IN PATNIDB5.PATNITS5;                                              00000700
+--CREATE UNIQUE INDEX DEPT_INDX ON DEPT (DEPTNO);                       00000710
+--INSERT INTO DEPT(DEPTNO,DNAME,LOC)                                    00000800
+--       VALUES (100,'DEVELOPMENT','MUMBAI');                           00000900
+--INSERT INTO DEPT(DEPTNO,DNAME,LOC)                                    00000910
+--         VALUES (200,'PLANNING','PUNE');                              00000920
+--INSERT INTO DEPT(DEPTNO,DNAME,LOC)                                    00000930
+--       VALUES (300,'TESTER','MUMBAI');                                00001000
+--INSERT INTO DEPT(DEPTNO,DNAME,LOC)                                    00001010
+--       VALUES (400,'DEBUGGER','PUNE');                                00001020
+--INSERT INTO DEPT(DEPTNO,DNAME,LOC)                                    00001030
+--       VALUES (500,'TESTER','PUNE');                                  00001040
+--INSERT INTO DEPT(DEPTNO,DNAME,LOC)                                    00001050
+--       VALUES (600,'DEVELOPMENT','PUNE');                             00001060
+--INSERT INTO DEPT(DEPTNO,DNAME,LOC)                                    00001070
+--       VALUES (700,'ANALYST','CHENNAI');                              00001080
+--INSERT INTO DEPT(DEPTNO,DNAME,LOC)                                    00001090
+--       VALUES (800,'PLANNING','MUMBAI');                              00001091
+--INSERT INTO DEPT(DEPTNO,DNAME,LOC)                                    00001092
+--       VALUES (900,'ANALYST','CHENNAI');                              00001093
+--SELECT * FROM DEPT;                                                   00001100
+--CREATE TABLE EMPLOYEE                                                 00001200
+--    ( EMPNO    INT NOT NULL,                                          00001300
+--      ENAME    VARCHAR(32) NOT NULL,                                  00001400
+--      JOB      CHAR(12),                                              00001500
+--      MGR      SMALLINT,                                              00001600
+--      HIREDATE DATE NOT NULL,                                         00001700
+--      SALARY   DECIMAL (7,2) NOT NULL,                                00001800
+--      COMM     DECIMAL (7,2),                                         00001900
+--      DEPTNO   SMALLINT,                                              00002000
+--      PRIMARY KEY (EMPNO),                                            00002100
+--      FOREIGN KEY (DEPTNO) REFERENCES DEPT                            00002200
+--    )                                                                 00002300
+--    IN PATNIDB5.PATNITS5;                                             00002400
+--CREATE UNIQUE INDEX EMPLOYEE_INDX ON EMPLOYEE(EMPNO);                 00002410
+--INSERT INTO EMPLOYEE                                                  00002500
+--       (EMPNO,ENAME,JOB,MGR,HIREDATE,SALARY,COMM,DEPTNO)              00002600
+--       VALUES(10101,'DAVID','MANAGER',314,                            00002700
+--       '2016-09-14',14000.00,300.00,100);                             00002800
+--INSERT INTO EMPLOYEE                                                  00002900
+--       (EMPNO,ENAME,JOB,MGR,HIREDATE,SALARY,COMM,DEPTNO)              00003000
+--       VALUES(20202,'SNEHA','PROJECT MGR',413,                        00003100
+--       '2016-09-06',24000.00,200.00,200);                             00003200
+--INSERT INTO EMPLOYEE                                                  00003300
+--       (EMPNO,ENAME,JOB,MGR,HIREDATE,SALARY,COMM,DEPTNO)              00003400
+--       VALUES(30303,'AKSHAY','CEO',433,                               00003500
+--       '2016-07-16',34000.00,100.00,300);                             00003600
+  INSERT INTO EMPLOYEE                                                  00003610
+         (EMPNO,ENAME,JOB,MGR,HIREDATE,SALARY,COMM,DEPTNO)              00003620
+         VALUES(40404,'SHASHI','MANAGER',121,                           00003630
+         '2016-02-21',15000.00,100.00,400);                             00003640
+  INSERT INTO EMPLOYEE                                                  00003650
+         (EMPNO,ENAME,JOB,MGR,HIREDATE,SALARY,COMM,DEPTNO)              00003660
+         VALUES(50505,'POOJA','ASSOCIATE',221,                          00003670
+         '2016-10-01',25000.00,200.00,500);                             00003680
+  INSERT INTO EMPLOYEE                                                  00003690
+         (EMPNO,ENAME,JOB,MGR,HIREDATE,SALARY,COMM,DEPTNO)              00003691
+         VALUES(60606,'PRASHNAT','ENGINEER',322,                        00003692
+         '2016-07-30',18000.00,100.00,600);                             00003693
+  INSERT INTO EMPLOYEE                                                  00003694
+         (EMPNO,ENAME,JOB,MGR,HIREDATE,SALARY,COMM,DEPTNO)              00003695
+         VALUES(70707,'HARSHA','ASSOCIATE',400,                         00003696
+         '2015-07-10',18000.00,100.00,700);                             00003697
+  INSERT INTO EMPLOYEE                                                  00003698
+         (EMPNO,ENAME,JOB,MGR,HIREDATE,SALARY,COMM,DEPTNO)              00003699
+         VALUES(80808,'JHON','MANAGER',420,                             00003700
+         '2014-06-06',48000.00,500.00,800);                             00003710
+  INSERT INTO EMPLOYEE                                                  00003720
+         (EMPNO,ENAME,JOB,MGR,HIREDATE,SALARY,COMM,DEPTNO)              00003730
+         VALUES(90909,'MESSI','LEGEND',666,                             00003740
+         '2015-02-08',66000.00,400.00,900);                             00003750
+-- SELECT * FROM EMPLOYEE;                                              00003800

@@ -1,0 +1,74 @@
+000100 IDENTIFICATION DIVISION.                                         00010000
+000200 PROGRAM-ID. DB2ACC.                                              00020000
+000300 ENVIRONMENT DIVISION.                                            00030000
+000400 DATA DIVISION.                                                   00040000
+000500 WORKING-STORAGE SECTION.                                         00050000
+000501 01 WS-SQL-ERROR PIC -9(4).                                       00050100
+000502 01 WS-ACCEPT    PIC 9(04).                                       00050200
+000503     EXEC SQL                                                     00050300
+000504        INCLUDE EMPLOY                                            00050400
+000505     END-EXEC.                                                    00050500
+000506     EXEC SQL                                                     00050600
+000507        INCLUDE SQLCA                                             00050700
+000508     END-EXEC.                                                    00050800
+000509     EXEC SQL                                                     00050900
+000510        DECLARE CURACC CURSOR FOR                                 00051000
+000511        SELECT EMPNO, ENAME, JOB, DEPTNO FROM EMPLOY              00051101
+000512        WHERE EMPNO = 3003                                        00051200
+000513     END-EXEC.                                                    00051300
+000514 PROCEDURE DIVISION.                                              00051400
+000515 0000-MAIN-PARA.                                                  00051500
+000516     PERFORM 1000-OPEN-CURSOR-PARA THRU 1000-EXIT-OPEN-PARA .     00051600
+000517     PERFORM 2000-FETCH-CURSOR-PARA THRU                          00051700
+000518          2000-EXIT-FETCH-PARA UNTIL SQLCODE = 100 .              00051800
+000519     PERFORM 3000-CLOSE-CURSOR-PARA THRU                          00051900
+000520          3000-EXIT-CLOSE-PARA .                                  00052000
+000530     STOP RUN.                                                    00053000
+000540 0000-EXIT-MAIN-PARA.                                             00054000
+000550     EXIT.                                                        00055000
+000560*                                                                 00056000
+000570 0001-ERROR-PARA .                                                00057000
+000580     MOVE SQLCODE TO WS-SQL-ERROR.                                00058000
+000590     DISPLAY  ' SQL ERROR   '   WS-SQL-ERROR.                     00059000
+000600 0001-EXIT-ERROR-PARA.                                            00060000
+000700     EXIT.                                                        00070000
+000701*                                                                 00070100
+000702 1000-OPEN-CURSOR-PARA.                                           00070200
+000703*   ACCEPT WS-JOB                                                 00070300
+000704*   ACCEPT WS-ACCEPT                                              00070400
+000705*   MOVE WS-ACCEPT TO WS-DEPTNO                                   00070500
+000706     EXEC SQL                                                     00070601
+000708        UPDATE EMPLOY SET ENAME = 'MAMTA', JOB = 'HR'             00070802
+000709        WHERE EMPNO = 3003                                        00070901
+000710     END-EXEC.                                                    00071001
+000711     EXEC SQL                                                     00071100
+000712        OPEN CURACC                                               00071200
+000713     END-EXEC.                                                    00071300
+000714 1000-EXIT-OPEN-PARA .                                            00071400
+000715     EXIT.                                                        00071500
+000720*                                                                 00072000
+000730 2000-FETCH-CURSOR-PARA.                                          00073000
+000740     EXEC SQL                                                     00074000
+000750       WHENEVER SQLERROR GO TO 0001-ERROR-PARA                    00075000
+000760*      0001-EXIT-ERROR-PARA                                       00076000
+000770     END-EXEC.                                                    00077000
+000780     EXEC SQL                                                     00078000
+000790       FETCH CURACC INTO :WS-EMPNO,:WS-ENAME,:WS-JOB,:WS-DEPTNO   00079000
+000800     END-EXEC.                                                    00080000
+000810*    MOVE SQLCODE TO WS-SQL-ERROR.                                00081000
+000820*    DISPLAY 'SQL ERROR AFTER FETCH : ' WS-SQL-ERROR.             00082000
+000830     IF SQLCODE = 100                                             00083000
+000840       PERFORM 3000-CLOSE-CURSOR-PARA THRU 3000-EXIT-CLOSE-PARA   00084000
+000850       STOP RUN                                                   00085000
+000860     END-IF.                                                      00086000
+000870     DISPLAY WS-EMPNO , '  ' , WS-ENAME , ' ' ,                   00087000
+000880                     WS-JOB , ' ' , WS-DEPTNO.                    00088000
+000890 2000-EXIT-FETCH-PARA .                                           00089000
+000900     EXIT.                                                        00090000
+001000 3000-CLOSE-CURSOR-PARA .                                         00100000
+001100       EXEC SQL                                                   00110000
+001200         CLOSE CURACC                                             00120000
+001300       END-EXEC .                                                 00130000
+001400 3000-EXIT-CLOSE-PARA .                                           00140000
+001500     EXIT.                                                        00150000
+

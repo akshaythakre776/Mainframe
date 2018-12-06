@@ -1,0 +1,120 @@
+       IDENTIFICATION DIVISION.                      
+       PROGRAM-ID. PROG.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+      ***********************************************************
+       WORKING-STORAGE SECTION.  
+       01 LEN              PIC S9(04)  COMP    VALUE 50.
+       01 RECORD-KEY       PIC X(05) VALUE ZERO.
+       01 WS-END-SESSION   PIC X(01) VALUE 'N'.
+       01 WS-COMM-AREA     PIC X(01).
+       01 WS-KEY-LENGTH    PIC 9(02) VALUE 6.
+       01 EMP-IOAREA.
+           05  EMP-ID      PIC 9(05).
+           05  EMP-NAME    PIC X(15).
+           05  EMP-LOC     PIC X(03).
+           05  EMP-DEPT    PIC X(05).
+           05  EMP-DOB     PIC X(08).
+           05  EMP-SAL     PIC 9(05)V99.
+           05  EMP-DEDN    PIC 9(05)V99.
+
+       COPY RDFILE.                        
+       COPY DFHAID.
+      *--------------------------------------------------------- 
+       LINKAGE SECTION.
+       01  DFHCOMMAREA              PIC X(01).
+      *********************************************************** 
+       PROCEDURE DIVISION.           
+       0000-MAIN-PARA.   
+           IF EIBCALEN = ZEROS
+               PERFORM 0001-FIRST-TIME-PARA
+            ELSE   
+               MOVE DFHCOMMAREA TO WS-COMM-AREA
+               PERFORM 2000-SUBSEQUENT.
+               
+               IF WS-END-SESSION = 'Y'
+                EXEC CICS   
+                SEND TEXT
+                   FROM(WS-END-SESSION)
+      *             ERASE
+                   LENGTH(02)
+                   FREEKB
+                 END-EXEC  
+                 EXEC CICS
+                   RETURN
+                 END-EXEC
+            ELSE  
+               EXEC CICS
+                   RETURN
+                       TRANSID('TRA1')
+                       COMMAREA(WS-COMM-AREA)
+                       LENGTH(+1)
+                END-EXEC.       
+      *------------------------------------------------------------
+       0001-FIRST-TIME-PARA.
+            MOVE LOW-VALUES TO RDFILEI
+            EXEC CICS
+               SEND MAPSET('RDFILE')
+                    MAP('RDFILE')
+                    FROM(RDFILEI)
+                    ERASE
+                    FREEKB
+                    CURSOR
+             END-EXEC.         
+      *-----------------------------------------------------
+       2000-SUBSEQUENT.  
+           IF EIBAID = DFHENTER
+               PERFORM 2222-RECEIVE-MAP.
+               PERFORM 7777-READ-FILE.
+               MOVE EMP-NAME TO ENAMEO.
+               PERFORM 2500-SEND-MAP.
+      *     EVALUATE TRUE
+      *        WHEN    EIBAID = DFHENTER
+      *            PERFORM 5555-PROCESS-PARA 
+      *        WHEN EIBAID = DFHPF3
+      *            RETURN TO CICS
+      *        WHEN EIBAID = DFHPF10
+      *             MOVE 'Y' TO WS-END-SESSION
+      *        WHEN WS-END-SESSION NOT = 'Y'
+      *             PERFORM 2500-SEND-MAP
+      *     END-EVALUATE.
+      *-----------------------------------------------------
+       2222-RECEIVE-MAP.
+           EXEC CICS  HANDLE CONDITION
+               MAPFAIL(8888-MAP-FAIL)
+           END-EXEC.
+
+          EXEC CICS
+               RECEIVE MAPSET('RDFILE')
+               MAP('RDFILE')
+               INTO(RDFILEI)
+           END-EXEC.
+      *----------------------------------------------------- 
+       2500-SEND-MAP SECTION.
+      
+           EXEC CICS
+               SEND MAPSET('RDFILE')
+               MAP('RDFILE')
+               FROM(RDFILEI)
+               FREEKB
+               CURSOR
+           END-EXEC.
+      *-----------------------------------------------------     
+       5555-PROCESS-PARA.    
+            PERFORM 2222-RECEIVE-MAP.
+            PERFORM 7777-READ-FILE.
+       7777-READ-FILE.     
+           MOVE EIDI TO RECORD-KEY.
+            EXEC CICS READ
+               DATASET('EMPMAST')
+               INTO(EMP-IOAREA)
+               RIDFLD(RECORD-KEY)
+               LENGTH(LEN)
+      *         KEYLENGTH(LEN)               
+            END-EXEC. 
+           
+       8888-MAP-FAIL.    
+           MOVE 'Y' TO WS-END-SESSION.
+       9999-EXIT.
+           EXIT.
+            

@@ -1,0 +1,294 @@
+JCL to Delete/Define a VSAM KSDS =
+
+//DSRP154V JOB CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID
+//STEP01 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *                                                   
+ DELETE DSRP154.AMOGH.KSDS CLUSTER PURGE                       
+ SET MAXCC=0                                                   
+ DEFINE CLUSTER (NAME(DSRP154.AMOGH.KSDS) -                    
+        TRACKS(1 1) -                                          
+        KEYS(5 0) -                                            
+        RECORDSIZE(50 50) -                                    
+        INDEXED -                                              
+        ) -                                                    
+        DATA (NAME(DSRP154.AMOGH.KSDS.DATA) -                  
+        ) -                                                    
+        INDEX (NAME(DSRP154.AMOGH.KSDS.INDEX) -                
+        )                                                      
+/*                                                             
+===============================================
+JCL to Delete/Define a VSAM RRDS =
+
+//DSRP154V JOB CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID
+//STEP01 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *                                                   
+ DELETE DSRP154.AMOGH.RRDS CLUSTER PURGE                       
+ SET MAXCC=0                                                   
+ DEFINE CLUSTER (NAME(DSRP154.AMOGH.RRDS) -                    
+        TRACKS(1 1) -                                          
+        RECORDSIZE(50 50) -                                    
+        NUMBERED -                                              
+        ) -                                                    
+        DATA (NAME(DSRP154.AMOGH.RRDS.DATA) -                  
+        )                                                      
+/*                                                             
+===============================================
+Profile Settings for a PS File =
+
+Profile Unlock / Prof Unlock
+Recovery On / Rec On
+Caps On
+Number Off / Num Off
+Autosave On
+Profile Lock / Prof Lock
+Reset / Res
++++++++++++
+Loads Records from PS File to VSAM ESDS
+
+//DSRP154V JOB CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID
+//*                                                            
+//STEP01 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//FILE1    DD DSN=DSRP154.AMOGH.PSINPUT,DISP=SHR               
+//FILE2    DD DSN=DSRP154.AMOGH.ESDS,DISP=SHR                  
+//SYSIN DD *                                                   
+  REPRO INFILE(FILE1) -                                        
+       OUTFILE(FILE2)                                          
+/*
++++++++++++
+Loads Records from PS File to VSAM RRDS
+
+//DSRP154V JOB CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID
+//*                                                            
+//STEP01 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//FILE1    DD DSN=DSRP154.AMOGH.PSINPUT,DISP=SHR               
+//FILE2    DD DSN=DSRP154.AMOGH.RRDS,DISP=SHR                  
+//SYSIN DD *                                                   
+  REPRO INFILE(FILE1) -                                        
+       OUTFILE(FILE2)                                          
+/*
++++++++++++
+Loads Records from PS File to VSAM KSDS
+
+//DSRP154V JOB CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID
+//*                                                            
+//STEP01 EXEC PGM=SORT                                         
+//SYSOUT   DD SYSOUT=*                                         
+//SORTIN   DD DSN=DSRP154.AMOGH.PSINPUT,DISP=SHR               
+//SORTOUT  DD DSN=&&TEMP,DISP=(NEW,PASS),                      
+//         DCB=(RECFM=FB,LRECL=50,BLKSIZE=5000),               
+//         SPACE=(TRK,(1,1),RLSE)                              
+//SYSIN DD *                                                   
+   SORT FIELDS=(1,5,CH,A)                                      
+/*                                                             
+//STEP02 EXEC PGM=IDCAMS                                       
+//SYSPRINT DD SYSOUT=*                                         
+//FILE1    DD DSN=&&TEMP,DISP=OLD                              
+//FILE2    DD DSN=DSRP154.AMOGH.KSDS,DISP=SHR                  
+//SYSIN DD *                                                   
+  REPRO INFILE(FILE1) -
+       OUTFILE(FILE2) -
+       REPLACE         
+/*                     
++++++++++++++++
+JCL to Print contents of KSDS, ESDS and RRDS to SPOOL (Sysout)
+
+//DSRP154V JOB CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID
+//*                                                            
+//STEP01 EXEC PGM=IDCAMS                                       
+//KSDSOUT  DD SYSOUT=*                                         
+//FILE1    DD DSN=DSRP154.AMOGH.KSDS,DISP=SHR                  
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *                                                   
+  REPRO INFILE(FILE1) -                                        
+       OUTFILE(KSDSOUT)                                        
+/*                                                             
+//STEP02 EXEC PGM=IDCAMS                                       
+//ESDSOUT  DD SYSOUT=*                                         
+//FILE1    DD DSN=DSRP154.AMOGH.ESDS,DISP=SHR                  
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *
+  REPRO INFILE(FILE1) -                      
+       OUTFILE(ESDSOUT)                      
+/*                                           
+//STEP03 EXEC PGM=IDCAMS                     
+//RRDSOUT  DD SYSOUT=*                       
+//FILE1    DD DSN=DSRP154.AMOGH.RRDS,DISP=SHR
+//SYSPRINT DD SYSOUT=*                       
+//SYSIN DD *                                 
+  REPRO INFILE(FILE1) -                      
+       OUTFILE(RRDSOUT)                      
+/*
++++++++++++++++++++++++
+JCL to create Backup of  a VSAM Dataset
+
+//STEP01 EXEC PGM=IEFBR14                       
+//FILE1    DD DSN=DSRP154.AMOGH.VSAM.KSDSBACK,      
+//         DISP=(MOD,DELETE,DELETE),            
+//         DCB=(RECFM=FB,LRECL=50,BLKSIZE=5000),
+//         SPACE=(TRK,(1,1),RLSE)               
+//*                                             
+//STEP02 EXEC PGM=IDCAMS                        
+//SYSPRINT DD SYSOUT=*                          
+//FILE2    DD DSN=DSRP154.AMOGH.VSAM.KSDSBACK,      
+//         DISP=(NEW,CATLG,DELETE),             
+//         DCB=(RECFM=FB,LRECL=50,BLKSIZE=5000),
+//         SPACE=(TRK,(1,1),RLSE)               
+//FILE1    DD DSN=DSRP154.AMOGH.KSDS,DISP=SHR   
+//SYSIN DD *                                    
+  REPRO INFILE(FILE1) -                         
+       OUTFILE(FILE2)                           
+/*
++++++++++++++++++++++++
+JCL to Restore VSAM Dataset from Backup (DELETE DEFINE REPRO)
+
+//STEP01 EXEC PGM=IDCAMS                              
+//FILE1    DD DSN=DSRP154.AMOGH.VSAM.KSDSBACK,DISP=SHR
+//SYSPRINT DD SYSOUT=*                                
+//SYSIN DD *                                          
+ DELETE DSRP154.AMOGH.KSDS CLUSTER PURGE              
+ SET MAXCC=0                                          
+ DEFINE CLUSTER (NAME(DSRP154.AMOGH.KSDS) -           
+        TRACKS(1 1) -                                 
+        KEYS(5 0) -                                   
+        RECORDSIZE(50 50) -                           
+        INDEXED -                                     
+        ) -                                           
+        DATA (NAME(DSRP154.AMOGH.KSDS.DATA) -         
+        ) -                                           
+        INDEX (NAME(DSRP154.AMOGH.KSDS.INDEX) -       
+        )
+  REPRO INFILE(FILE1) -              
+       OUTDATASET(DSRP154.AMOGH.KSDS)
+/*
++++++++++++++++++++++++++++++++++++++
+JCL to Print contents of Dataset to SYSPRINT in different Formats
+
+//STEP01 EXEC PGM=IDCAMS                     
+//FILE1    DD DSN=DSRP154.AMOGH.KSDS,DISP=SHR
+//SYSPRINT DD SYSOUT=*                       
+//SYSIN DD *                                 
+  PRINT INFILE(FILE1) CHAR                   
+/*                                           
+//STEP02 EXEC PGM=IDCAMS                     
+//FILE1    DD DSN=DSRP154.AMOGH.ESDS,DISP=SHR
+//SYSPRINT DD SYSOUT=*                       
+//SYSIN DD *                                 
+  PRINT INFILE(FILE1) HEX                    
+/*                                           
+//STEP03 EXEC PGM=IDCAMS                     
+//FILE1    DD DSN=DSRP154.AMOGH.RRDS,DISP=SHR
+//SYSPRINT DD SYSOUT=*                       
+//SYSIN DD *                                 
+  PRINT INFILE(FILE1) DUMP                   
+/*                                           
+
+
+
+
+
+
+                                   
+
+
+
+
+
+
+
+                                             
+
+
+
+
+                                              
+
+
+
+
+
+
+
+
++++++++++++++++++++++++
+JCL to Print selective Records from KSDS using SKIP & COUNT
+
+//STEP01 EXEC PGM=IDCAMS                                       
+//KSDSOUT1  DD SYSOUT=*                                         
+//FILE1    DD DSN=DSRP154.AMOGH.KSDS,DISP=SHR                  
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *                                                   
+  REPRO INFILE(FILE1) -                                        
+       OUTFILE(KSDSOUT) -                                      
+       SKIP(3) -                                               
+       COUNT(9)                                                
+/*
++++++++++++++++
+JCL to Print selective Records from KSDS using FROMKEY & TOKEY
+
+//STEP01 EXEC PGM=IDCAMS                                       
+//KSDSOUT2  DD SYSOUT=*                                         
+//FILE1    DD DSN=DSRP154.AMOGH.KSDS,DISP=SHR                  
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *                                                   
+  REPRO INFILE(FILE1) -                                        
+       OUTFILE(KSDSOUT2) -                                      
+       FROMKEY(10101) -                                               
+       TOKEY(40404)                                                
+/*
++++++++++++++++++++++++
+JCL to Print selective Records from ESDS using SKIP & COUNT
+
+//STEP01 EXEC PGM=IDCAMS                                       
+//KSDSOUT  DD SYSOUT=*                                         
+//FILE1    DD DSN=DSRP154.AMOGH.ESDS,DISP=SHR                  
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *                                                   
+  REPRO INFILE(FILE1) -                                        
+       OUTFILE(KSDSOUT) -                                      
+       SKIP(3) -                                               
+       COUNT(9)                                                
+/*
++++++++++++++++
+JCL to Print selective Records from ESDS using FROMADDRESS & TOADDRESS
+
+//STEP01 EXEC PGM=IDCAMS                                       
+//KSDSOUT  DD SYSOUT=*                                         
+//FILE1    DD DSN=DSRP154.AMOGH.ESDS,DISP=SHR                  
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *                                                   
+  REPRO INFILE(FILE1) -                                        
+       OUTFILE(KSDSOUT) -                                      
+       FROMADDRESS(100) -                                               
+       TOADDRESS(350)                                                
+/*
++++++++++++++++++++++++
+JCL to Print selective Records from RRDS using SKIP & COUNT
+
+//STEP01 EXEC PGM=IDCAMS                                       
+//RRDSOUT1  DD SYSOUT=*                                         
+//FILE1    DD DSN=DSRP154.AMOGH.RRDS,DISP=SHR                  
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *                                                   
+  REPRO INFILE(FILE1) -                                        
+       OUTFILE(RRDSOUT1) -                                      
+       SKIP(1) -                                               
+       COUNT(3)                                                
+/*
++++++++++++++++
+JCL to Print selective Records from RRDS using FROMNUMBER & TONUMBER
+
+//STEP01 EXEC PGM=IDCAMS                                       
+//RRDSOUT2  DD SYSOUT=*                                         
+//FILE1    DD DSN=DSRP154.AMOGH.RRDS,DISP=SHR                  
+//SYSPRINT DD SYSOUT=*                                         
+//SYSIN DD *                                                   
+  REPRO INFILE(FILE1) -                                        
+       OUTFILE(RRDSOUT2) -                                      
+       FROMNUMBER(2) -                                               
+       TONUMBER(4)                                                
+/*
+

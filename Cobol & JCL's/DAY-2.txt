@@ -1,0 +1,33 @@
+Case Expression :-
+** Select 
+	EMPNO
+	,LASTNAME
+	,CASE SUBSTR(WORKDEPT,1,1)
+	WHEN 'A' THEN 'ADMINISTRATION'
+	WHEN 'B' THEN 'HUMAN RESOURCES'
+	WHEN 'C' THEN 'DESIGN'
+	WHEN 'D' THEN 'ADMINISTRATION'
+	ELSE 'UNKNOWN DEPARTMENT'
+    END AS DIVISION
+FROM EMPLOYEE;
+
+===================================================================================	
+
+** SYSIBM.SYSDUMMY1
+
+===================================================================================
+
+** SELECT CURRENT DATE FROM SYSIBM.SYSDUMMY1;
+** SELECT CURRENT TIME FROM SYSIBM.SYSDUMMY1;
+** SELECT CURRENT TIMESTAMP FROM SYSIBM.SYSDUMMY1;
+
+** DATE AND TIME CALCULATIONS :-
+	CURRENT DATE + 1 YEAR
+	CURRENT DATE + 3 YEARS + 2 MONTHS + 15 DAYS
+	CURRENT TIME + 5 HOURS - 3 MINUNTES + 10 SECONDS
+**  
+===================================================================================
+
+** CREATE TABLE DEPT AS SELECT FROM EMPLOYEE;
+
+===================================================================================
